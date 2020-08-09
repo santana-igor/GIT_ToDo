@@ -73,9 +73,16 @@ class ToDoController extends Controller
      */
     public function show(ToDo $toDo, $id)
     {
-        $todo = ToDo::find($id);
-
-        return json_encode($todo);
+        try {
+            $todo = ToDo::find($id);
+            if (!empty($todo)) {
+                return json_encode($todo);
+            } else {
+                return json_encode(['status' => 'Not found!']);
+            }
+        } catch (\PDOException $e) {
+            return json_encode($e->getMessage());
+        }
     }
 
     /**
@@ -96,9 +103,40 @@ class ToDoController extends Controller
      * @param  \App\Models\ToDo  $toDo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ToDo $toDo)
+    public function update(Request $request, ToDo $toDo, $id)
     {
-        return json_encode($request->id);
+        $user_auth = 1;
+
+        $todo = ToDo::find($id);
+
+        if (empty($todo)) {
+            return json_encode(['status' => 'Not found!']);
+        }
+
+        $rules = [
+            'title' => 'required | max:40',
+            'description' => 'required',
+            'status' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return json_encode($validate->errors());
+        }
+
+        try {
+
+            $todo->title = $request->title;
+            $todo->description = $request->description;
+            $todo->status = $request->status;
+            $todo->user_id = $user_auth;
+            $todo->save();
+
+            return json_encode(['status' => 'Success']);
+        } catch (\PDOException $e) {
+            return json_encode($e->getMessage());
+        }
     }
 
     /**
