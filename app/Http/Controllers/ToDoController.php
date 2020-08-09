@@ -109,6 +109,6 @@ class ToDoController extends Controller
      */
     public function destroy(ToDo $toDo)
     {
-        //
+        return json_encode(['mensagem' => 'ok']);
     }
 }
