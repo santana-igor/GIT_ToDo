@@ -107,8 +107,19 @@ class ToDoController extends Controller
      * @param  \App\Models\ToDo  $toDo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ToDo $toDo)
+    public function destroy(ToDo $toDo, $id)
     {
-        return json_encode($toDo);
+
+        try {
+            $todo = ToDo::destroy($id);
+
+            if ($todo == 1) {
+                return json_encode(['status' => 'Success']);
+            } else {
+                return json_encode(['status' => 'Not found!']);
+            }
+        } catch (\PDOException $e) {
+            return json_encode($e->getMessage());
+        }
     }
 }
